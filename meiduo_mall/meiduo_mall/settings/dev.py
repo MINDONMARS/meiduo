@@ -32,7 +32,7 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
-INSTALLED_APPS = {
+INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -45,7 +45,7 @@ INSTALLED_APPS = {
     'users.apps.UsersConfig',
     'verifications.apps.VerificationsConfig',
 
-}
+]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -90,6 +90,26 @@ DATABASES = {
         'NAME': 'meiduo_mall'  # 数据库名字
     }
 }
+
+# 配置Redis作为缓存的后端数据库
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://192.168.73.128:6379/0",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    },
+    "session": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://192.168.103.132:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "session"
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
@@ -177,4 +197,5 @@ REST_FRAMEWORK = {
 
 # 指定默认的用户模型类
 # 注意点：语法规则必须是'应用名.用户模型类'
+# 注意点：由于指定用户模型类的规则限制。所以在注册users应用时，必须从'users.apps.UsersConfig'开始
 AUTH_USER_MODEL = 'users.User'

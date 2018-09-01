@@ -24,6 +24,6 @@ class SMSCodeView(APIView):
         # 存到redis
         redis_conn = get_redis_connection('verify_codes')
         redis_conn.setex('sms_%s' % mobile, constants.SMS_CODE_REDIS_EXPIRES, sms_code)
-        CCP.send_template_sms(mobile, [sms_code, constants.SMS_CODE_REDIS_EXPIRES//60], 1)
+        CCP().send_template_sms(mobile, [sms_code, constants.SMS_CODE_REDIS_EXPIRES // 60], 1)
         return Response({'message': 'ok'})
 

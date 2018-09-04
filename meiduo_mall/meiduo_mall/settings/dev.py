@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import os
 import sys
+import datetime
+
 
 print(sys.path)
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -209,6 +211,13 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ),
+}
+
+# JWT的有效期
+JWT_AUTH = {
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=1),
+    # 为JWT登录视图补充返回值
+    'JWT_RESPONSE_PAYLOAD_HANDLER': 'users.utils.jwt_response_payload_handler',
 }
 
 # 指定默认的用户模型类

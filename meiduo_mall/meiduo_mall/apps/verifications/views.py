@@ -35,6 +35,6 @@ class SMSCodeView(APIView):
         # 完了要执行一下管道
         pl.execute()
         # CCP().send_template_sms(mobile, [sms_code, constants.SMS_CODE_REDIS_EXPIRES // 60], 1)
-        send_sms_code.delay(mobile, sms_code)  # 调用delay(),触发celery异步任务
+        # send_sms_code.delay(mobile, sms_code)  # 调用delay(),触发celery异步任务
         return Response({'message': 'ok'})
 

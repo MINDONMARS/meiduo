@@ -1,13 +1,13 @@
-from django.shortcuts import render
-from rest_framework.views import APIView
-import random, logging
-from django_redis import get_redis_connection
-from . import constants
-from meiduo_mall.libs.yuntongxun.sms import CCP
-from rest_framework.response import Response
-from rest_framework import status
-# Create your views here.
+import logging
+import random
 
+from django_redis import get_redis_connection
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from celery_tasks.sms.tasks import send_sms_code
+from . import constants
 
 logger = logging.getLogger('django')
 
@@ -27,11 +27,14 @@ class SMSCodeView(APIView):
         sms_code = '%06d' % random.randint(0, 999999)
         logger.info(sms_code)
         # 存到redis
-
-        redis_conn.setex('sms_%s' % mobile, constants.SMS_CODE_REDIS_EXPIRES, sms_code)
+        # redis管道:将多个redis指令放在一个管道里面，统一执行，减少redis数据库访问的频率，提升性能
+        pl = redis_conn.pipeline()
+        pl.setex('sms_%s' % mobile, constants.SMS_CODE_REDIS_EXPIRES, sms_code)
         # 添加redis标记校验用户60秒内是否重复发送
-        redis_conn.setex('send_flag_%s' % mobile, constants.SEND_SMS_CODE_INTERVAL, 1)
-
-        CCP().send_template_sms(mobile, [sms_code, constants.SMS_CODE_REDIS_EXPIRES // 60], 1)
+        pl.setex('send_flag_%s' % mobile, constants.SEND_SMS_CODE_INTERVAL, 1)
+        # 完了要执行一下管道
+        pl.execute()
+        # CCP().send_template_sms(mobile, [sms_code, constants.SMS_CODE_REDIS_EXPIRES // 60], 1)
+        send_sms_code.delay(mobile, sms_code)  # 调用delay(),触发celery异步任务
         return Response({'message': 'ok'})
 

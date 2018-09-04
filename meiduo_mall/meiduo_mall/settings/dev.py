@@ -48,6 +48,7 @@ INSTALLED_APPS = [
 
     'users.apps.UsersConfig',
     'verifications.apps.VerificationsConfig',
+    'oauth.apps.OauthConfig',  # qq登录模块
 
 ]
 

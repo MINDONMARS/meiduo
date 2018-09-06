@@ -1,6 +1,7 @@
 from django.conf.urls import url
-from django.contrib import admin
+from . import views
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
+    url(r'^qq/authorization/$', views.QQAuthURLView.as_view()),
+    url(r'^qq/user/$', views.QQAuthUserView.as_view()),
 ]

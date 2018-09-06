@@ -5,6 +5,31 @@ from .models import User
 from rest_framework_jwt.settings import api_settings
 
 
+class EmailSerializer(serializers.ModelSerializer):
+    """添加邮箱序列化器"""
+    class Meta:
+        model = User
+        fields = ('id', 'email')
+        extra_kwargs = {
+            'email': {
+                'required': True
+            }
+        }
+
+    def update(self, instance, validated_data):
+        instance.email = validated_data['email']
+        instance.save()
+        return instance
+
+
+class UserDetialSerializer(serializers.ModelSerializer):
+    """对用户基本信息进行序列化"""
+
+    class Meta:
+        model = User
+        fields = ('username', 'mobile', 'email', 'email_active')
+
+
 class CreateUserSerializer(serializers.ModelSerializer):
     # 定义外部字段
     password2 = serializers.CharField(label='确认密码', write_only=True)

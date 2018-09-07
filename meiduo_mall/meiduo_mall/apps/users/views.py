@@ -1,14 +1,70 @@
 from django.shortcuts import render
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import CreateAPIView, RetrieveAPIView, UpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
+from rest_framework.viewsets import GenericViewSet
+from rest_framework.generics import mixins
 
-from .models import User
-from .serializers import CreateUserSerializer, UserDetialSerializer, EmailSerializer
+from users import constants
+from .models import User, Address
+from .serializers import CreateUserSerializer, UserDetialSerializer, EmailSerializer, AddressSerializer, AddressTitleSerializer
 
 # Create your views here.
+
+
+class AddressViewset(mixins.CreateModelMixin, mixins.ListModelMixin, GenericViewSet):
+    """收货地址增删改查"""
+
+    # 指定序列化器/查询集
+    serializer_class = AddressSerializer
+    queryset = Address.objects.all()
+
+    # 增
+    def create(self, request, *args, **kwargs):
+
+        count = self.request.user.addresses.count()
+        if count > 20:
+            return Response({'message': '地址数量超出限制'}, status.HTTP_400_BAD_REQUEST)
+        return super(AddressViewset, self).create(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return self.request.user.addresses.filter(is_deleted=False)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        # page = self.paginate_queryset(queryset)
+        # if page is not None:
+        #     serializer = self.get_serializer(page, many=True)
+        #     return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        user = self.request.user
+        return Response({
+            'user_id': user.id,
+            'default_address_id': user.default_address_id,
+            'limit': constants.USER_ADDRESS_COUNTS_LIMIT,
+            'addresses': serializer.data,
+        })
+
+    @action(methods=['put'], detail=True)
+    def title(self, request, pk):
+        address = self.get_object()
+        serializer = AddressTitleSerializer(address, request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    def destroy(self, request, pk):
+        address = self.get_object()
+        address.is_deleted = True
+        address.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 
 
 class VerifyEmailView(APIView):

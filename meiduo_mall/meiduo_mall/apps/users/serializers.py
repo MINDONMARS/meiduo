@@ -4,8 +4,44 @@ from django_redis import get_redis_connection
 from rest_framework import serializers
 from rest_framework_jwt.settings import api_settings
 
-from .models import User
+from .models import User, Address
 from celery_tasks.email.tasks import send_veriiy_email
+
+
+class AddressTitleSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Address
+        fields = ['title']
+
+
+class AddressSerializer(serializers.ModelSerializer):
+    province = serializers.StringRelatedField(read_only=True)
+    city = serializers.StringRelatedField(read_only=True)
+    district = serializers.StringRelatedField(read_only=True)
+    province_id = serializers.IntegerField(label='省id', required=True)
+    city_id = serializers.IntegerField(label='市id', required=True)
+    district_id = serializers.IntegerField(label='区id', required=True)
+
+    class Meta:
+        model = Address
+        exclude = ['user', 'is_deleted', 'create_time', 'update_time']
+
+    def validate_mobile(self, value):
+        """
+        校验
+        :param value: mobile
+        :return: value
+        """
+        if not re.match(r'1[3-9]\d{9}', value):
+            raise serializers.ValidationError('手机号错误')
+        return value
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        validated_data['user'] = user
+        address = Address.objects.create(**validated_data)
+        return address
 
 
 class EmailSerializer(serializers.ModelSerializer):

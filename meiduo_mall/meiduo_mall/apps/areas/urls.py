@@ -1,6 +1,10 @@
 from django.conf.urls import url
-from django.contrib import admin
 
-urlpatterns = [
-    url(r'^admin/', admin.site.urls),
-]
+from rest_framework.routers import DefaultRouter
+from . import views
+
+urlpatterns = []
+
+router = DefaultRouter()
+router.register('areas', views.AreasViewset, base_name='areas')
+urlpatterns += router.urls

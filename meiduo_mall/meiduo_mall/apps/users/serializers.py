@@ -1,8 +1,10 @@
 import re
 from django_redis import get_redis_connection
+
 from rest_framework import serializers
-from .models import User
 from rest_framework_jwt.settings import api_settings
+
+from .models import User
 
 
 class EmailSerializer(serializers.ModelSerializer):
@@ -19,6 +21,7 @@ class EmailSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         instance.email = validated_data['email']
         instance.save()
+
         return instance
 
 

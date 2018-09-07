@@ -1,9 +1,11 @@
 # celery启动的入口：创建celery对象，加载celery配置，注册celery任务
 from celery import Celery
 
-# import os
-# if not os.getenv('DJANGO_SETTINGS_MODULE'):
-#     os.environ['DJANGO_SETTINGS_MODULE'] = 'meiduo_mall.settings.dev'
+# 为celery使用django配置文件进行设置(一定要放在最前面)
+import os
+if not os.getenv('DJANGO_SETTINGS_MODULE'):
+    os.environ['DJANGO_SETTINGS_MODULE'] = 'meiduo_mall.settings.dev'
+
 # 创建celery对象，并起别名,别名没有实际意义，仅仅是celery的名字
 celery_app = Celery('meiduo')
 
@@ -11,4 +13,4 @@ celery_app = Celery('meiduo')
 celery_app.config_from_object('celery_tasks.config')
 
 # 注册celery任务
-celery_app.autodiscover_tasks(['celery_tasks.sms'])
+celery_app.autodiscover_tasks(['celery_tasks.sms', 'celery_tasks.email'])

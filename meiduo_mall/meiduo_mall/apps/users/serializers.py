@@ -5,6 +5,7 @@ from rest_framework import serializers
 from rest_framework_jwt.settings import api_settings
 
 from .models import User
+from celery_tasks.email.tasks import send_veriiy_email
 
 
 class EmailSerializer(serializers.ModelSerializer):
@@ -21,6 +22,9 @@ class EmailSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         instance.email = validated_data['email']
         instance.save()
+
+        verify_url = instance.generate_email_verify_url()
+        send_veriiy_email.delay(instance.email, verify_url)
 
         return instance
 

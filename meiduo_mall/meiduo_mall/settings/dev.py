@@ -251,4 +251,4 @@ EMAIL_HOST = 'smtp.163.com'  # 发邮件主机
 EMAIL_PORT = 25  # 发邮件端口
 EMAIL_HOST_USER = 'chi_xu_1016@163.com'  # 授权的邮箱
 EMAIL_HOST_PASSWORD = 'CH1230'  # 邮箱授权时获得的密码，非注册登录密码
-EMAIL_FROM = '美多商城<dailyfreshzxc@yeah.net>'  # 发件人抬头
+EMAIL_FROM = '美多商城<chi_xu_1016@163.com>'  # 发件人抬头

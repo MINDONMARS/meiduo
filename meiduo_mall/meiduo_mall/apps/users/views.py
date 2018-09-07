@@ -2,14 +2,34 @@ from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import CreateAPIView, RetrieveAPIView, UpdateAPIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+
 from .models import User
 from .serializers import CreateUserSerializer, UserDetialSerializer, EmailSerializer
-from rest_framework.permissions import IsAuthenticated
 
 # Create your views here.
 
 
+class VerifyEmailView(APIView):
+    """实现邮箱的先验证激活"""
+
+    def get(self, request):
+        token = request.query_params.get('token')
+        if not token:
+            return Response({'message': '缺少token'}, status=status.HTTP_400_BAD_REQUEST)
+        # 解token(去别地方)
+        user = User.check_email_verify_url(token)
+        if not user:
+            return Response({'message': '无效token'}, status=status.HTTP_400_BAD_REQUEST)
+        user.email_active = True
+        user.save()
+        return Response({'message': 'ok'})
+
+
 class EmailView(UpdateAPIView):
+    """天机邮箱"""
+
     serializer_class = EmailSerializer
     permission_classes = [IsAuthenticated]
 
@@ -18,6 +38,8 @@ class EmailView(UpdateAPIView):
 
 
 class UserDetialView(RetrieveAPIView):
+    """用户基本信息"""
+
     serializer_class = UserDetialSerializer
     permission_classes = [IsAuthenticated]
 

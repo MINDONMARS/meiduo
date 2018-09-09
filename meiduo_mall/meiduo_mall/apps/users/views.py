@@ -15,12 +15,12 @@ from .serializers import CreateUserSerializer, UserDetialSerializer, EmailSerial
 # Create your views here.
 
 
-class AddressViewset(mixins.CreateModelMixin, mixins.ListModelMixin, GenericViewSet):
+class AddressViewset(mixins.CreateModelMixin, mixins.UpdateModelMixin, GenericViewSet):
     """收货地址增删改查"""
 
     # 指定序列化器/查询集
     serializer_class = AddressSerializer
-    queryset = Address.objects.all()
+    # queryset = Address.objects.all()
 
     # 增
     def create(self, request, *args, **kwargs):
@@ -51,6 +51,13 @@ class AddressViewset(mixins.CreateModelMixin, mixins.ListModelMixin, GenericView
         })
 
     @action(methods=['put'], detail=True)
+    def status(self, request, pk):
+        address = self.get_object()
+        request.user.default_address = address
+        request.user.save()
+        return Response({'message': 'ok'}, status=status.HTTP_200_OK)
+
+    @action(methods=['put'], detail=True)
     def title(self, request, pk):
         address = self.get_object()
         serializer = AddressTitleSerializer(address, request.data)
@@ -63,8 +70,6 @@ class AddressViewset(mixins.CreateModelMixin, mixins.ListModelMixin, GenericView
         address.is_deleted = True
         address.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
 
 
 class VerifyEmailView(APIView):
@@ -84,7 +89,7 @@ class VerifyEmailView(APIView):
 
 
 class EmailView(UpdateAPIView):
-    """天机邮箱"""
+    """添加邮箱"""
 
     serializer_class = EmailSerializer
     permission_classes = [IsAuthenticated]

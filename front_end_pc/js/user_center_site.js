@@ -244,7 +244,7 @@ var vm = new Vue({
             if (!this.input_title) {
                 alert("请填写标题后再保存！");
             } else {
-                axios.put(this.host + '/addresses/' + this.addresses[index].id + '/', {
+                axios.put(this.host + '/addresses/' + this.addresses[index].id + '/title/', {
                         title: this.input_title
                     }, {
                         headers: {

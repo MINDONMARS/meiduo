@@ -50,7 +50,7 @@ INSTALLED_APPS = [
     'verifications.apps.VerificationsConfig',
     'oauth.apps.OauthConfig',  # qq登录模块
     'areas.apps.AreasConfig',
-
+    'goods.apps.GoodsConfig',
 ]
 
 MIDDLEWARE = [

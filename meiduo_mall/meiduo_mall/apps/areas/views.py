@@ -1,6 +1,7 @@
 from django.shortcuts import render
 
 from rest_framework.viewsets import ReadOnlyModelViewSet
+from rest_framework_extensions.cache.mixins import CacheResponseMixin
 
 from .models import Area
 from . import serializers
@@ -8,7 +9,7 @@ from . import serializers
 # Create your views here.
 
 
-class AreasViewset(ReadOnlyModelViewSet):
+class AreasViewset(CacheResponseMixin, ReadOnlyModelViewSet):
     """省市区三级联动数据"""
 
     pagination_class = None

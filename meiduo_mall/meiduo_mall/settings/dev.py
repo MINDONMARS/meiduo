@@ -212,7 +212,7 @@ REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'meiduo_mall.utils.exceptions.exception_handler',
     # 认证
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_jwt.authentication.JSONWebTokenAuthentication', # JWT认证，在前面的认证方案优先
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',  # JWT认证，在前面的认证方案优先
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ),

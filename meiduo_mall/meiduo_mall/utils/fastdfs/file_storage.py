@@ -19,7 +19,7 @@ class FastDFSStorage(Storage):
 
         ret = client.upload_by_buffer(content.read())
 
-        if ret.get('Status') != 'Upload successde.':
+        if ret.get('Status') != 'Upload successed.':
             raise Exception('upload file failed')
 
         file_id = ret.get('Remote file_id')

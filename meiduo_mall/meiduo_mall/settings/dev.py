@@ -45,6 +45,8 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'corsheaders',
+    'ckeditor',  # 富⽂本编辑器
+    'ckeditor_uploader',  # 富⽂本编辑器上传图⽚模块
 
     'users.apps.UsersConfig',
     'verifications.apps.VerificationsConfig',

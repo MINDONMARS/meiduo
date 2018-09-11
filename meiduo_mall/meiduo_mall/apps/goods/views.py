@@ -16,6 +16,7 @@ class SKUListView(ListAPIView):
     serializer_class = SKUSerializer
     # 指定排序后端
     filter_backends = [OrderingFilter]
+
     # 指定排序字段
     ordering_fields = ('create_time', 'price', 'sales')
 

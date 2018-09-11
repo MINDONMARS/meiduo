@@ -94,7 +94,7 @@ WSGI_APPLICATION = 'meiduo_mall.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'HOST': '192.168.73.128',  # 数据库主机
+        'HOST': '192.168.73.129',  # 数据库主机
         'PORT': 3306,  # 数据库端口
         'USER': 'meiduo',  # 数据库用户名
         'PASSWORD': 'meiduo',  # 数据库用户密码
@@ -106,21 +106,21 @@ DATABASES = {
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://192.168.73.128:6379/0",
+        "LOCATION": "redis://192.168.73.129:6379/0",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },
     "session": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://192.168.73.128:6379/1",
+        "LOCATION": "redis://192.168.73.129:6379/1",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },
     "verify_codes": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://192.168.73.128:6379/2",
+        "LOCATION": "redis://192.168.73.129:6379/2",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
@@ -264,7 +264,7 @@ EMAIL_FROM = '美多商城<chi_xu_1016@163.com>'  # 发件人抬头
 DEFAULT_FILE_STORAGE = 'meiduo_mall.utils.fastdfs.file_storage.FastDFSStorage'
 
 # FastDFS配置信息
-FDFS_BASE_URL = 'http://192.168.73.128:8888/'
+FDFS_BASE_URL = 'http://192.168.73.129:8888/'
 FDFS_CLIENT_CONF = os.path.join(BASE_DIR, 'utils/fastdfs/client.conf')
 
 # 富文本编辑器ckeditor配置

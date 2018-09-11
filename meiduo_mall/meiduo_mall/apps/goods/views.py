@@ -17,7 +17,7 @@ class SKUListView(ListAPIView):
     # 指定排序后端
     filter_backends = [OrderingFilter]
     # 指定排序字段
-    ordering_fidlds = ('create_time', 'price', 'sales')
+    ordering_fields = ('create_time', 'price', 'sales')
 
     def get_queryset(self):
         category_id = self.kwargs.get('category_id')

@@ -2,12 +2,23 @@ from django.shortcuts import render
 from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.response import Response
 from rest_framework.filters import OrderingFilter
+from drf_haystack.viewsets import HaystackViewSet
 
 from .models import SKU, GoodsCategory
-from .serializers import ChannelSerializer, CategorySerializer, SKUSerializer
+from .serializers import ChannelSerializer, CategorySerializer, SKUSerializer, SKUIndexSerializer
 
 
 # Create your views here.
+
+
+class SKUSearchViewSet(HaystackViewSet):
+    """
+    SKU搜索
+    """
+    # 指定索引模型类
+    index_models = [SKU]
+    # 指定序列化器
+    serializer_class = SKUIndexSerializer
 
 
 class SKUListView(ListAPIView):
@@ -19,6 +30,7 @@ class SKUListView(ListAPIView):
 
     # 指定排序字段
     ordering_fields = ('create_time', 'price', 'sales')
+
     def get_queryset(self):
         category_id = self.kwargs.get('category_id')
         # 必须是上架商品

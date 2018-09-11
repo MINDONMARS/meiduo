@@ -67,7 +67,7 @@ var vm = new Vue({
 
         // this.get_skus();
 
-        // this.get_categories();
+        this.get_categories();
         // this.get_cart();
         // this.get_hot_goods();
     },

@@ -1,11 +1,28 @@
 from django.shortcuts import render
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.response import Response
+from rest_framework.filters import OrderingFilter
 
-from .serializers import ChannelSerializer, CategorySerializer
-from .models import GoodsCategory
+from .models import SKU, GoodsCategory
+from .serializers import ChannelSerializer, CategorySerializer, SKUSerializer
+
 
 # Create your views here.
+
+
+class SKUListView(ListAPIView):
+    """商品列表:排序和分页"""
+    # 指定序列化器
+    serializer_class = SKUSerializer
+    # 指定排序后端
+    filter_backends = [OrderingFilter]
+    # 指定排序字段
+    ordering_fidlds = ('create_time', 'price', 'sales')
+
+    def get_queryset(self):
+        category_id = self.kwargs.get('category_id')
+        # 必须是上架商品
+        return SKU.objects.filter(category_id=category_id, is_launched=True)
 
 
 # url(r'^categories/(?P<pk>\d+)/$', views.CategoryView.as_view()),
@@ -37,6 +54,3 @@ class CategoryView(GenericAPIView):
             ret['cat1'] = ChannelSerializer(category.parent.goodschannel_set.all()[0]).data
 
         return Response(ret)
-from rest_framework import serializers
-
-from .models import GoodsCategory, GoodsChannel

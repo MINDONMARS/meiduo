@@ -1,6 +1,14 @@
 from rest_framework import serializers
 
-from .models import GoodsCategory, GoodsChannel
+from .models import GoodsCategory, GoodsChannel, SKU
+
+
+class SKUSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = SKU
+        fields = ['id', 'name', 'price', 'comments', 'default_image_url']
+
 
 
 class CategorySerializer(serializers.ModelSerializer):

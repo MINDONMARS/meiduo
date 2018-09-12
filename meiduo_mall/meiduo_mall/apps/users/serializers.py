@@ -5,7 +5,37 @@ from rest_framework import serializers
 from rest_framework_jwt.settings import api_settings
 
 from .models import User, Address
+from goods.models import SKU
 from celery_tasks.email.tasks import send_veriiy_email
+
+
+class UserBrowsingHistorySerializer(serializers.Serializer):
+    """创建用户浏览记录序列化器"""
+    sku_id = serializers.IntegerField(label='商品ID', min_value=1)
+
+    def validate_sku_id(self, value):
+
+        try:
+            SKU.objects.get(id=value)
+        except SKU.DoesNotExist:
+            raise serializers.ValidationError('sku_id不存在')
+        return value
+
+    def create(self, validated_data):
+        sku_id = validated_data.get('sku_id')
+        user_id = self.context['request'].user.id
+
+        redis_conn = get_redis_connection('history')
+        pl = redis_conn.pipeline()
+        # 去重
+        pl.lrem('history_%s' % user_id, 0, sku_id)
+        # 添加
+        pl.lpush('history_%s' % user_id, sku_id)
+        # 截取5个
+        pl.ltrim('history_%s' % user_id, 0, 4)
+        pl.execute()
+
+        return validated_data
 
 
 class AddressTitleSerializer(serializers.ModelSerializer):

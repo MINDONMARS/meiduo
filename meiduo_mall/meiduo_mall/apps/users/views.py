@@ -15,6 +15,14 @@ from .serializers import CreateUserSerializer, UserDetialSerializer, EmailSerial
 # Create your views here.
 
 
+class UserBrowsingHistoryView(CreateAPIView):
+    """保存用户浏览记录"""
+    # 序列化器
+    serializer_class = ''
+    # 权限: 登录才能保存浏览记录
+    permission_classes = [IsAuthenticated]
+
+
 class AddressViewset(mixins.CreateModelMixin, mixins.UpdateModelMixin, GenericViewSet):
     """收货地址增删改查"""
 

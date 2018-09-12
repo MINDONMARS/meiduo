@@ -16,6 +16,8 @@ urlpatterns = [
     url(r'^user/$', views.UserDetialView.as_view()),
     url(r'^email/$', views.EmailView.as_view()),
     url(r'^emails/verification/$', views.VerifyEmailView.as_view()),
+    # 用户浏览记录
+    url(r'^browse_histories/$', views.UserBrowsingHistoryView.as_view()),
 ]
 
 router = DefaultRouter()

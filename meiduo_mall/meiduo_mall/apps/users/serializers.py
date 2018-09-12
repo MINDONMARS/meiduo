@@ -9,6 +9,13 @@ from goods.models import SKU
 from celery_tasks.email.tasks import send_veriiy_email
 
 
+class SKUSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = SKU
+        fields = ('id', 'name', 'price', 'default_image_url', 'comments')
+
+
 class UserBrowsingHistorySerializer(serializers.Serializer):
     """创建用户浏览记录序列化器"""
     sku_id = serializers.IntegerField(label='商品ID', min_value=1)

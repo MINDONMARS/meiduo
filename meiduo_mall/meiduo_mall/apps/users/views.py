@@ -7,10 +7,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.generics import mixins
+from django_redis import get_redis_connection
 
 from users import constants
 from .models import User, Address
-from .serializers import CreateUserSerializer, UserDetialSerializer, EmailSerializer, AddressSerializer, AddressTitleSerializer
+from .serializers import SKUSerializer, UserBrowsingHistorySerializer, CreateUserSerializer, UserDetialSerializer, EmailSerializer, AddressSerializer, AddressTitleSerializer
+from goods.models import SKU
 
 # Create your views here.
 
@@ -18,9 +20,23 @@ from .serializers import CreateUserSerializer, UserDetialSerializer, EmailSerial
 class UserBrowsingHistoryView(CreateAPIView):
     """保存用户浏览记录"""
     # 序列化器
-    serializer_class = ''
+    serializer_class = UserBrowsingHistorySerializer
     # 权限: 登录才能保存浏览记录
     permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """获取用户浏览记录"""
+        redis_conn = get_redis_connection('history')
+
+        sku_ids = redis_conn.lrange('history_%s' % request.user.id, 0, -1)
+
+        sku_list = []
+        for sku_id in sku_ids:
+            sku = SKU.objects.get(id=sku_id)
+            sku_list.append(sku)
+
+        serializer = SKUSerializer(sku_list, many=True)
+        return Response(serializer.data)
 
 
 class AddressViewset(mixins.CreateModelMixin, mixins.UpdateModelMixin, GenericViewSet):

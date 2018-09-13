@@ -59,7 +59,6 @@ class CartView(APIView):
             if cart_str:
                 cart_str_bytes = cart_str.encode()
                 cart_dict_bytes = base64.b64decode(cart_str_bytes)
-                print(cart_dict_bytes)
                 cart_dict = pickle.loads(cart_dict_bytes)
 
             else:
@@ -186,7 +185,49 @@ class CartView(APIView):
 
     def delete(self, request):
         """删除购物车"""
-        pass
+        serializer = serializers.DelSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        sku_id = serializer.validated_data.get('sku_id')
+
+        # 用户是否登录
+        try:
+            user = request.user
+        except Exception:
+            user = None
+
+        # 用户已登录
+        if user is not None and user.is_authenticated:
+            redis_conn = get_redis_connection('cart')
+
+            redis_conn.hdel('cart_%s' % user.id, sku_id)
+            redis_conn.srem('selected_%s' % user.id, sku_id)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        else:
+            # 获取cookie
+            cart_str = request.COOKIES.get('cart')
+            if cart_str:
+                cart_str_bytes = cart_str.encode()
+                cart_dict_bytes = base64.b64decode(cart_str_bytes)
+                cart_dict = pickle.loads(cart_dict_bytes)
+
+            else:
+                cart_dict = {}
+
+            sku_ids = cart_dict.keys()
+            response = Response(status=status.HTTP_204_NO_CONTENT)
+            if sku_id in sku_ids:
+                cart_dict.pop(sku_id)
+
+                cookie_dict_bytes = pickle.dumps(cart_dict)
+                cookie_str_bytes = base64.b64encode(cookie_dict_bytes)
+                cookie_str = cookie_str_bytes.decode()
+
+                response.set_cookie('cart', cookie_str)
+            return response
+
+
 
 
 class SelectAll(APIView):
@@ -245,3 +286,4 @@ class SelectAll(APIView):
                 response = Response(serializer.data)
                 response.set_cookie('cart', cookie_cart_str)
                 return response
+            return Response({'message': 'ok'})

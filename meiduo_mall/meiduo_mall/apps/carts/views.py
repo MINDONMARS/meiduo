@@ -1,6 +1,8 @@
 from django.shortcuts import render
-
+from django_redis import get_redis_connection
 from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.views import status
 
 from . import serializers
 
@@ -24,6 +26,11 @@ class CartView(APIView):
         # 校验
         serializer.is_valid(raise_exception=True)
 
+        # 读取校验后的数据
+        sku_id = serializer.validated_data.get('sku_id')
+        count = serializer.validated_data.get('count')
+        selected = serializer.validated_data.get('selected')
+
         # 判断用户是否登录
         try:
             user = request.user
@@ -32,7 +39,16 @@ class CartView(APIView):
 
         if user is not None and user.is_authenticated:
             # 已登录 操作redis
-            pass
+            redis_conn = get_redis_connection('cart')
+            pl = redis_conn.pipeline()
+
+            # 给redis购物车做增量存储,计算
+            # redis_conn.hincrby(name, key, amount=1)
+            pl.hincrby('cart_%s' % user.id, sku_id, count)
+            if selected:
+                pl.sadd('selected_%s' % user.id, sku_id)
+            pl.execute()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             # 未登录 操作cookie
             pass

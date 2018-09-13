@@ -80,7 +80,16 @@ class CartView(APIView):
 
     def get(self, request):
         """查询购物车"""
-        pass
+        # 判断用户是否登录
+        try:
+            user = request.user
+        except Exception:
+            user = None
+        if user is not None and user.is_authenticated
+            # 已登录, 读redis
+            pass
+        else:
+            pass
 
     def put(self, request):
         """更新购物车"""

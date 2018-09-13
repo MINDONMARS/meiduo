@@ -3,6 +3,7 @@ from django_redis import get_redis_connection
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.views import status
+import base64, pickle
 
 from . import serializers
 
@@ -51,7 +52,31 @@ class CartView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             # 未登录 操作cookie
-            pass
+            # 获取浏览器中的cookie数据
+            cart_str = request.COOKIES.get('cart')
+
+            if cart_str:
+                cart_str_bytes = cart_str.encode()
+                cart_dict_bytes = base64.b64decode(cart_str_bytes)
+                cart_dict = pickle.loads(cart_dict_bytes)
+            else:
+                cart_dict = {}  # 保证用户即使是第一次使用cookie保存购物车数据，也有字典对象可以操作
+            if sku_id in cart_dict:
+                # 要添加的商品购物车里已经有了, 累加
+                origin_count = cart_dict[sku_id]['count']
+                count += origin_count
+            cart_dict = {
+                'count': count,
+                'selected': selected
+            }
+            # 编个码丢出去
+            cookie_cart_dict_bytes = pickle.dumps(cart_dict)
+            cookie_cart_str_bytes = base64.b64encode(cookie_cart_dict_bytes)
+            cookie_cart_str = cookie_cart_str_bytes.decode()
+            # 写入cookie
+            response = Response(serializer.data, status=status.HTTP_201_CREATED)
+            response.set_cookie('cart', cookie_cart_str)
+            return response
 
     def get(self, request):
         """查询购物车"""

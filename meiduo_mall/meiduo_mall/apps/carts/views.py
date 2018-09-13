@@ -24,7 +24,18 @@ class CartView(APIView):
         # 校验
         serializer.is_valid(raise_exception=True)
 
-        pass
+        # 判断用户是否登录
+        try:
+            user = request.user
+        except Exception:
+            user = None
+
+        if user is not None and user.is_authenticated:
+            # 已登录 操作redis
+            pass
+        else:
+            # 未登录 操作cookie
+            pass
 
     def get(self, request):
         """查询购物车"""

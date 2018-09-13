@@ -9,6 +9,12 @@ from rest_framework.views import APIView
 class CartView(APIView):
     """购物车增删改差"""
 
+    def perform_authentication(self, request):
+        """
+        先延后认证(登录和没登录用户都要能进来)
+        """
+        pass
+
     def post(self, request):
         """添加购物车"""
         pass

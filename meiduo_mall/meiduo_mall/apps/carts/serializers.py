@@ -3,6 +3,10 @@ from rest_framework import serializers
 from goods.models import SKU
 
 
+class SelectAllSerializer(serializers.Serializer):
+    selected = serializers.BooleanField(label='是否全选')
+
+
 class GetCartSerializer(serializers.ModelSerializer):
     """获取购物车序列化器"""
     count = serializers.IntegerField(label='数量')

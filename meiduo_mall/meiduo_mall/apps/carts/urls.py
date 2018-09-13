@@ -3,4 +3,5 @@ from . import views
 
 urlpatterns = [
     url(r'^carts/$', views.CartView.as_view()),
+    url(r'^carts/selection/$', views.SelectAll.as_view())
 ]

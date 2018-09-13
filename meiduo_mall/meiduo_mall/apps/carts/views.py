@@ -59,7 +59,9 @@ class CartView(APIView):
             if cart_str:
                 cart_str_bytes = cart_str.encode()
                 cart_dict_bytes = base64.b64decode(cart_str_bytes)
+                print(cart_dict_bytes)
                 cart_dict = pickle.loads(cart_dict_bytes)
+
             else:
                 cart_dict = {}  # 保证用户即使是第一次使用cookie保存购物车数据，也有字典对象可以操作
             if sku_id in cart_dict:
@@ -185,3 +187,61 @@ class CartView(APIView):
     def delete(self, request):
         """删除购物车"""
         pass
+
+
+class SelectAll(APIView):
+    """全选"""
+
+    def perform_authentication(self, request):
+
+        pass
+
+    def put(self, request):
+        serializer = serializers.SelectAllSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        selected = serializer.validated_data.get('selected')
+
+        # 判断用户是否登录
+        try:
+            user = request.user
+        except Exception:
+            user = None
+
+        # 如果user已登录 更新redis
+        if user is not None and user.is_authenticated:
+            # 创建redis对象
+            redis_conn = get_redis_connection('cart')
+            # 获取selected
+            pl = redis_conn.pipeline()
+            cart = redis_conn.hgetall('cart_%s' % user.id)
+            sku_ids = cart.keys()
+            if sku_ids:
+                for sku_id in sku_ids:
+                    if selected:
+                        pl.sadd('selected_%s' % user.id, sku_id)
+                    else:
+                        pl.srem('selected_%s' % user.id, sku_id)
+                pl.execute()
+            return Response(serializer.data)
+
+        # 用户未登录操作cookie
+        else:
+            cart_str = request.COOKIES.get('cart')
+            if cart_str:
+                cart_str_bytes = cart_str.encode()
+                cart_dict_bytes = base64.b64decode(cart_str_bytes)
+                cart_dict = pickle.loads(cart_dict_bytes)
+                # 拿selected
+
+                for sku_id in cart_dict:
+
+                    cart_dict[sku_id]['selected'] = selected
+
+                cookie_cart_dict_bytes = pickle.dumps(cart_dict)
+                cookie_cart_str_bytes = base64.b64encode(cookie_cart_dict_bytes)
+                cookie_cart_str = cookie_cart_str_bytes.decode()
+
+                response = Response(serializer.data)
+                response.set_cookie('cart', cookie_cart_str)
+                return response

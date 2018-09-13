@@ -155,15 +155,32 @@ class CartView(APIView):
             pl.execute()
             return Response(serializer.data)
 
-
         else:
             # 修改cookie
-            pass
 
+            # 获取cookie
+            cart_str = request.COOKIES.get('cart')
 
+            # 如果有
+            if cart_str:
+                cart_str_bytes = cart_str.encode()
+                cart_dict_bytes = base64.b64decode(cart_str_bytes)
+                cart_dict = pickle.loads(cart_dict_bytes)
+            # 如果没有
+            else:
+                cart_dict = {}
+            cart_dict[sku_id] = {
+                'count': count,
+                'selected': selected
+            }
+            # 编码丢出去
+            cart_dict_bytes = pickle.dumps(cart_dict)
+            cart_str_bytes = base64.b64encode(cart_dict_bytes)
+            cart_str = cart_str_bytes.decode()
 
-
-
+            response = Response(serializer.data)
+            response.set_cookie('cart', cart_str)
+            return response
 
     def delete(self, request):
         """删除购物车"""

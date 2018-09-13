@@ -99,8 +99,8 @@ class CartView(APIView):
             cart_dict = {}
             for sku_id, count in redis_cart_dict.items():
                 cart_dict[int(sku_id)] = {
-                    'count', int(count),
-                    'selected', sku_id in redis_selected  # 如果sku_id在redis_selected中，返回True;反之，返回False
+                    'count': int(count),
+                    'selected': sku_id in redis_selected  # 如果sku_id在redis_selected中，返回True;反之，返回False
                 }
 
         else:
@@ -118,6 +118,7 @@ class CartView(APIView):
         sku_ids = cart_dict.keys()
         skus = SKU.objects.filter(id__in=sku_ids)
         for sku in skus:
+
             sku.count = cart_dict[sku.id]['count']
             sku.selected = cart_dict[sku.id]['selected']  # 给商品对象加了两个序列化用的字段
         serializer = serializers.GetCartSerializer(skus, many=True)
@@ -126,7 +127,43 @@ class CartView(APIView):
 
     def put(self, request):
         """更新购物车"""
-        pass
+        serializer = serializers.CartSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # 读取校验后的数据
+        sku_id = serializer.validated_data.get('sku_id')
+        count = serializer.validated_data.get('count')
+        selected = serializer.validated_data.get('selected')
+        # 判断用户是否登录
+        try:
+            user = request.user
+        except Exception:
+            user = None
+
+        # 用户登录
+        if user is not None and user.is_authenticated:
+            # 修改redis
+            redis_conn = get_redis_connection('cart')
+            pl = redis_conn.pipeline()
+
+            pl.hset('cart_%s' % user.id, sku_id, count)
+
+            if selected:
+                pl.sadd('selected_%s' % user.id, sku_id)
+            else:
+                pl.srem('selected_%s' % user.id, sku_id)
+            pl.execute()
+            return Response(serializer.data)
+
+
+        else:
+            # 修改cookie
+            pass
+
+
+
+
+
 
     def delete(self, request):
         """删除购物车"""

@@ -6,6 +6,7 @@ from rest_framework.views import status
 import base64, pickle
 
 from . import serializers
+from goods.models import SKU
 
 # Create your views here.
 
@@ -65,7 +66,7 @@ class CartView(APIView):
                 # 要添加的商品购物车里已经有了, 累加
                 origin_count = cart_dict[sku_id]['count']
                 count += origin_count
-            cart_dict = {
+            cart_dict[sku_id] = {
                 'count': count,
                 'selected': selected
             }
@@ -85,11 +86,43 @@ class CartView(APIView):
             user = request.user
         except Exception:
             user = None
-        if user is not None and user.is_authenticated
+        if user is not None and user.is_authenticated:
             # 已登录, 读redis
-            pass
+            redis_conn = get_redis_connection('cart')
+            # 查询redis中的购物车数据:
+            # 注意点：python3中的从redis读取的数据都是bytes类型的数据
+            # redis_cart_dict = {b'sku_id_1': b'count_1', b'sku_id_2': b'count_2'}
+            redis_cart_dict = redis_conn.hgetall('cart_%s' % user.id)
+            # 查询是否勾选
+            # redis_selected = [b'sku_id_1']
+            redis_selected = redis_conn.smembers('selected_%s' % user.id)
+            cart_dict = {}
+            for sku_id, count in redis_cart_dict.items():
+                cart_dict[int(sku_id)] = {
+                    'count', int(count),
+                    'selected', sku_id in redis_selected  # 如果sku_id在redis_selected中，返回True;反之，返回False
+                }
+
         else:
-            pass
+            # 没有登录
+            cart_str = request.COOKIES.get('cart')
+
+            if cart_str:
+                cart_str_bytes = cart_str.encode()
+                cart_dict_bytes = base64.b64decode(cart_str_bytes)
+                cart_dict = pickle.loads(cart_dict_bytes)
+            else:
+                cart_dict = {}
+
+        # 序列化响应 其中count, selected字段没有自己加
+        sku_ids = cart_dict.keys()
+        skus = SKU.objects.filter(id__in=sku_ids)
+        for sku in skus:
+            sku.count = cart_dict[sku.id]['count']
+            sku.selected = cart_dict[sku.id]['selected']  # 给商品对象加了两个序列化用的字段
+        serializer = serializers.GetCartSerializer(skus, many=True)
+
+        return Response(serializer.data)
 
     def put(self, request):
         """更新购物车"""

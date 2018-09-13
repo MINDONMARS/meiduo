@@ -3,6 +3,17 @@ from rest_framework import serializers
 from goods.models import SKU
 
 
+class GetCartSerializer(serializers.ModelSerializer):
+    """获取购物车序列化器"""
+    count = serializers.IntegerField(label='数量')
+    selected = serializers.BooleanField(label='是否勾选')
+
+    class Meta:
+        model = SKU
+        fields = ('id', 'count', 'name', 'default_image_url', 'price', 'selected')
+
+
+
 class CartSerializer(serializers.Serializer):
     """购物车序列化器"""
     sku_id = serializers.IntegerField(label='商品ID', min_value=1)

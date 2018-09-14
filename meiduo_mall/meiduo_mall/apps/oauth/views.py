@@ -107,6 +107,7 @@ from rest_framework_jwt.views import api_settings
 from .utils import generate_save_user_token
 from rest_framework.generics import GenericAPIView
 from .serializers import QQAuthUserSerializer
+from carts.utils import merge_cart_cookie_to_redis
 
 logger = logging.getLogger('django')
 
@@ -143,11 +144,14 @@ class QQAuthUserView(GenericAPIView):
             # jwt_token
             token = jwt_encode_handler(payload)
             # 将token添加到user : python是面向对象的高级动态编程语言
-            return Response({
+            # 合并购物车
+            response = Response({
                 'user_id': user.id,
                 'username': user.username,
                 'token': token
             })
+            response = merge_cart_cookie_to_redis(request, response, user)
+            return response
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -161,11 +165,14 @@ class QQAuthUserView(GenericAPIView):
         # jwt_token
         token = jwt_encode_handler(payload)
         # 将token添加到user : python是面向对象的高级动态编程语言
-        return Response({
+        # 合并购物车
+        response = Response({
             'user_id': user.id,
             'username': user.username,
             'token': token
         })
+        response = merge_cart_cookie_to_redis(request, response, user)
+        return response
 
 
 class QQAuthURLView(APIView):

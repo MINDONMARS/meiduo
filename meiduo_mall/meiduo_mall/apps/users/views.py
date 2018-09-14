@@ -8,13 +8,47 @@ from rest_framework import status
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.generics import mixins
 from django_redis import get_redis_connection
+from rest_framework_jwt.views import ObtainJSONWebToken
 
 from users import constants
 from .models import User, Address
 from .serializers import SKUSerializer, UserBrowsingHistorySerializer, CreateUserSerializer, UserDetialSerializer, EmailSerializer, AddressSerializer, AddressTitleSerializer
 from goods.models import SKU
+from carts.utils import merge_cart_cookie_to_redis
 
 # Create your views here.
+
+# JWT源代码
+# def post(self, request, *args, **kwargs):
+#     serializer = self.get_serializer(data=request.data)
+#
+#     if serializer.is_valid():
+#         user = serializer.object.get('user') or request.user
+#         token = serializer.object.get('token')
+#         response_data = jwt_response_payload_handler(token, user, request)
+#         response = Response(response_data)
+#         if api_settings.JWT_AUTH_COOKIE:
+#             expiration = (datetime.utcnow() +
+#                           api_settings.JWT_EXPIRATION_DELTA)
+#             response.set_cookie(api_settings.JWT_AUTH_COOKIE,
+#                                 token,
+#                                 expires=expiration,
+#                                 httponly=True)
+#         return response
+#
+#     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserAuthorizeView(ObtainJSONWebToken):
+    """重写jwt登录试图"""
+
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.object.get('user') or request.user
+            response = merge_cart_cookie_to_redis(request, response, user)
+            return response
 
 
 class UserBrowsingHistoryView(CreateAPIView):

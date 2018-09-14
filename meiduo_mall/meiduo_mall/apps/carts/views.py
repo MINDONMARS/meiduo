@@ -228,8 +228,6 @@ class CartView(APIView):
             return response
 
 
-
-
 class SelectAll(APIView):
     """全选"""
 
@@ -268,6 +266,7 @@ class SelectAll(APIView):
         # 用户未登录操作cookie
         else:
             cart_str = request.COOKIES.get('cart')
+            response = Response(serializer.data)
             if cart_str:
                 cart_str_bytes = cart_str.encode()
                 cart_dict_bytes = base64.b64decode(cart_str_bytes)
@@ -278,11 +277,8 @@ class SelectAll(APIView):
 
                     cart_dict[sku_id]['selected'] = selected
 
-                cookie_cart_dict_bytes = pickle.dumps(cart_dict)
-                cookie_cart_str_bytes = base64.b64encode(cookie_cart_dict_bytes)
-                cookie_cart_str = cookie_cart_str_bytes.decode()
-
-                response = Response(serializer.data)
-                response.set_cookie('cart', cookie_cart_str)
-                return response
-            return Response({'message': 'ok'})
+                    cookie_cart_dict_bytes = pickle.dumps(cart_dict)
+                    cookie_cart_str_bytes = base64.b64encode(cookie_cart_dict_bytes)
+                    cookie_cart_str = cookie_cart_str_bytes.decode()
+                    response.set_cookie('cart', cookie_cart_str)
+            return response

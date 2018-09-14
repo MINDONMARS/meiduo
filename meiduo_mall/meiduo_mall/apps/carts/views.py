@@ -258,11 +258,10 @@ class SelectAll(APIView):
             cart = redis_conn.hgetall('cart_%s' % user.id)
             sku_ids = cart.keys()
             if sku_ids:
-                for sku_id in sku_ids:
-                    if selected:
-                        pl.sadd('selected_%s' % user.id, sku_id)
-                    else:
-                        pl.srem('selected_%s' % user.id, sku_id)
+                if selected:
+                    pl.sadd('selected_%s' % user.id, *sku_ids)
+                else:
+                    pl.srem('selected_%s' % user.id, *sku_ids)
                 pl.execute()
             return Response(serializer.data)
 

@@ -8,6 +8,7 @@ from .models import OrderInfo, OrderGoods
 from goods.models import SKU
 import time
 
+
 class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:

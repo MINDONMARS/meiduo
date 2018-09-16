@@ -115,11 +115,11 @@ class OrderSerializer(serializers.ModelSerializer):
                         # 跳出循环
                         break
 
-                    # 最后给总价加上运费
-                    order.total_amount += order.freight
-                    # 同步到数据库
-                    order.save()
-                # 捕获try出来的异常
+                # 最后给总价加上运费
+                order.total_amount += order.freight
+                # 同步到数据库
+                order.save()
+            # 捕获try出来的异常
             except serializers.ValidationError:
                 raise
             except Exception:

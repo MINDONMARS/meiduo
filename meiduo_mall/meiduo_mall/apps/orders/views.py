@@ -17,7 +17,7 @@ class OrderView(CreateAPIView):
     """订单视图"""
 
     # 指定序列化器
-    serializer_class = '序列化器'
+    serializer_class = serializers.OrderSerializer
     permission_classes = [IsAuthenticated]
 
 

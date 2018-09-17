@@ -6,7 +6,6 @@ from django.db import transaction
 
 from .models import OrderInfo, OrderGoods
 from goods.models import SKU
-import time
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -83,7 +82,6 @@ class OrderSerializer(serializers.ModelSerializer):
                             # 出错就回滚到保存点
                             transaction.savepoint_rollback(save_id)
                             raise serializers.ValidationError('库存不足')
-                        time.sleep(10)
 
                         # sku减库存加销量
                         new_stock = origin_stock - cart_sku_count

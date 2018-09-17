@@ -50,6 +50,11 @@ INSTALLED_APPS = [
     'django_crontab',  # 定时任务
     'haystack',  # 对接Elasticsearch
 
+    # 以下应用是xadmin
+    'xadmin',
+    'crispy_forms',
+    'reversion',
+
     'users.apps.UsersConfig',
     'verifications.apps.VerificationsConfig',
     'oauth.apps.OauthConfig',  # qq登录模块
@@ -101,6 +106,14 @@ DATABASES = {
         'PORT': 3306,  # 数据库端口
         'USER': 'meiduo',  # 数据库用户名
         'PASSWORD': 'meiduo',  # 数据库用户密码
+        'NAME': 'meiduo_mall'  # 数据库名字
+    },
+    'slave': { # 从：读
+        'ENGINE': 'django.db.backends.mysql',
+        'HOST': '192.168.73.129',  # 数据库主机
+        'PORT': 8306,  # 数据库端口
+        'USER': 'root',  # 数据库用户名
+        'PASSWORD': 'mysql',  # 数据库用户密码
         'NAME': 'meiduo_mall'  # 数据库名字
     }
 }
